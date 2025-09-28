@@ -6,3 +6,11 @@ path :
   val : "nerf_example_data/nerf_synthetic/lego/val"
   test : "nerf_example_data/nerf_synthetic/lego/test"
 
+train :
+  batch_size : 1
+  N_rays : 512
+  epoch: 3
+  log_every: 1
+  lr : 5e-4
+  img_size : 100
+  N_samples : 64

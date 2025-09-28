@@ -23,16 +23,13 @@ def show_set_images(images, title="Images Viewer", delay=500):
     total = len(images_np)
 
     while True:
-        # Copie de l'image pour ajouter du texte
         img_disp = cv2.cvtColor(images_np[idx], cv2.COLOR_RGB2BGR).copy()
 
-        # Texte du haut (titre)
         cv2.putText(
             img_disp, title, (10, 30),
             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA
         )
 
-        # Texte du bas (progression + autoplay)
         status = f"image {idx+1}/{total} - autoplay {'ON' if autoplay else 'OFF'}"
         h = img_disp.shape[0]
         cv2.putText(
@@ -40,27 +37,24 @@ def show_set_images(images, title="Images Viewer", delay=500):
             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2, cv2.LINE_AA
         )
 
-        # Affiche l'image
         cv2.imshow("Image Viewer", img_disp)
 
         if cv2.getWindowProperty("Image Viewer", cv2.WND_PROP_VISIBLE) < 1:
             break
 
-        # Mode autoplay → avance automatiquement
         if autoplay:
             key = cv2.waitKey(delay)
             idx = (idx + 1) % total
         else:
             key = cv2.waitKey(0)
 
-        # Gestion des touches
         if key == ord("q"):
             break
-        elif key == 2:  # flèche gauche
+        elif key == 2:  
             idx = (idx - 1) % total
-        elif key == 3:  # flèche droite
+        elif key == 3:  
             idx = (idx + 1) % total
-        elif key == 32:  # espace = toggle autoplay
+        elif key == 32:  
             autoplay = not autoplay
 
     cv2.destroyAllWindows()
