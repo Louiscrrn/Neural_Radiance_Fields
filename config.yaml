@@ -1,0 +1,8 @@
+# config.yaml
+
+path :
+  root : "nerf_example_data/nerf_synthetic/lego"
+  train : "nerf_example_data/nerf_synthetic/lego/train"
+  val : "nerf_example_data/nerf_synthetic/lego/val"
+  test : "nerf_example_data/nerf_synthetic/lego/test"
+
