@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     optimizer = torch.optim.Adam(model.parameters(), lr=float(config["train"]["lr"]))
 
-    trainer = NeRFTrainer(model, optimizer, device="cpu", near=2.0, far=6.0, N_samples=config["train"]["N_samples"])
+    trainer = NeRFTrainer(model, optimizer, device=str(config["train"]["device"]), near=2.0, far=6.0, N_samples=int(config["train"]["N_samples"]))
 
     print("\n\n TRAINING STARTS : \n")
-    trainer.train(train_loader, epochs=config["train"]["epoch"], log_every=config["train"]["log_every"])
+    trainer.train(train_loader, epochs=int(config["train"]["epoch"]), log_every=int(config["train"]["log_every"]))
