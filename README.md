@@ -1,7 +1,7 @@
 # NeRF Implementation (PyTorch)
 
 This project is a clean PyTorch implementation of a Neural Radiance Field (NeRF) 
-trained and tested on the Lego dataset (Blender).
+trained and tested on the Lego dataset (Blender). Includes positional encoding, hierarchical sampling, and volumetric rendering.
 
 ## 📂 Project structure
 - `config.yaml` : training and dataset configuration (image size, rays per batch, epochs, etc.)
