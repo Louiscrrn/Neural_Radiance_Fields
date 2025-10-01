@@ -7,10 +7,15 @@ from dataset import LegoDataset, collate_rays
 from torch.utils.data import DataLoader
 from model import NeRF
 from train import NeRFTrainer
+from datetime import datetime
+
 
 if __name__ == "__main__":
     load_dotenv()
     data_path = Path(os.getenv('DATA_PATH'))
+
+    now = datetime.now()
+    formatted = now.strftime("%Y-%m-%d-%H-%M")
 
     with open("config.yaml", "r") as f:
         config = yaml.safe_load(f)
@@ -43,4 +48,5 @@ if __name__ == "__main__":
     trainer = NeRFTrainer(model, optimizer, device=str(config["train"]["device"]), near=2.0, far=6.0, N_samples=int(config["train"]["N_samples"]))
 
     print("\n\n TRAINING STARTS : \n")
-    trainer.train(train_loader, epochs=int(config["train"]["epoch"]), log_every=int(config["train"]["log_every"]))
+    historic = trainer.train(train_loader, epochs=int(config["train"]["epoch"]), log_every=int(config["train"]["log_every"]))
+    historic.to_csv(config["path"]["outputs"] + "/" + config["experiment"]["name"] + "_" + formatted + ".csv", index=False)

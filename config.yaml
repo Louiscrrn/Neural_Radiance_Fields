@@ -5,11 +5,15 @@ path :
   train : "nerf_example_data/nerf_synthetic/lego/train"
   val : "nerf_example_data/nerf_synthetic/lego/val"
   test : "nerf_example_data/nerf_synthetic/lego/test"
+  outputs : "outputs"
+
+experiment :
+  name : "nerf_training"
 
 train :
   batch_size : 1
-  N_rays : 512
-  epoch: 3
+  N_rays : 2500
+  epoch: 1
   log_every: 50
   lr : 5e-4
   img_size : 100
