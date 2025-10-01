@@ -15,7 +15,7 @@ class NeRFTrainer:
         self.near = near
         self.far = far
         self.N_samples = N_samples
-        self.ssim_fn = StructuralSimilarityIndexMeasure(data_range=1.0).to_device(device)
+        self.ssim_fn = StructuralSimilarityIndexMeasure(data_range=1.0).to(device)
 
     def train_step(self, batch):
         rays_o = batch["rays_o"].to(self.device)
