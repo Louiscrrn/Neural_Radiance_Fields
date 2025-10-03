@@ -33,10 +33,6 @@ class NeRFTrainer:
 
         loss = F.mse_loss(rgb_map, target_rgb)
 
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-
         psnr = mse2psnr(loss.detach()).item()
 
         N_rays = rgb_map.shape[0]
@@ -47,7 +43,7 @@ class NeRFTrainer:
         ssim = self.ssim_fn(rgb_map_img,
                     target_img).item()
 
-        return loss.item(), psnr, ssim
+        return loss, psnr, ssim
 
     def fit(self, train_loader, val_loader=None, epochs=10, log_every=100):
 
@@ -64,7 +60,6 @@ class NeRFTrainer:
             for batch in pbar:
                 loss, psnr, ssim = self.step(batch)
 
-                # Backpropagation
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
