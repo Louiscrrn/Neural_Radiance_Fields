@@ -22,6 +22,8 @@ class NeRFTrainer:
         rays_d = batch["rays_d"].to(self.device)
         target_rgb = batch["target_rgb"].to(self.device)
 
+        rays_d = F.normalize(rays_d, dim=-1)
+
         pts, t_vals = sample_points(rays_o, rays_d, self.near, self.far, self.N_samples)
 
         pts_flat = pts.reshape(-1, 3)

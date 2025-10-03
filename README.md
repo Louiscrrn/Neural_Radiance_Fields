@@ -23,7 +23,7 @@ pip install -r requirements.txt
 Set your dataset path in `.env`:
 ```bash
 echo "DATA_PATH=/path/to/nerf_synthetic" > .env
-echo "DATA_PATH=/content/NeRF-PyTorch-3D-Vision/data/nerf_synthetic" > .env
+echo "DATA_PATH=/content/NeRF-PyTorch-3D-Vision/data/" > .env
 ```
 
 Configure parameters in `config.yaml` (`img_size`, `N_rays`, `lr`, `epochs`, etc.)
