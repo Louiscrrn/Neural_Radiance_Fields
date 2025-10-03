@@ -21,36 +21,40 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
     
     # --- Dataset Loading ---
-    img_size = config["train"]["img_size"]
+    cfg_data = config["data"]
+    img_size = cfg_data["img_size"]
     train_dataset = LegoDataset(
             data_path / config["path"]["root"], 
             type="train",
-            img_size=img_size
+            img_size=img_size,
+            size=cfg_data["train_size"]
         )
     val_dataset = LegoDataset(
             data_path / config["path"]["root"], 
             type="val",
-            img_size=img_size
+            img_size=img_size,
+            size=cfg_data["train_size"]
         )
     print("Dataset length:", len(train_dataset))
     
-    N_rays = config["train"]["N_rays"]
+    N_rays = config["train"]["batch_rays"]
     train_loader = DataLoader(
             train_dataset,
-            batch_size=config["train"]["batch_size"],      
+            batch_size=1,      
             shuffle=True,
             collate_fn=lambda b: collate_rays(b, N_rays=N_rays)
     )
     val_loader = DataLoader(
             val_dataset,
-            batch_size=config["train"]["batch_size"],      
+            batch_size=1,      
             shuffle=True,
             collate_fn=lambda b: collate_rays(b, N_rays=N_rays)
     )
 
 
     # --- Fitting --- 
-    model = NeRF()
+    config_model = config["model"]
+    model = NeRF(depth=config_model["depth"], L_encoding=config_model["L_frequency_encoding"], neurons=config_model["n_neurons"])
     optimizer = torch.optim.Adam(model.parameters(), lr=float(config["train"]["lr"]))
     trainer = NeRFTrainer(model, optimizer, device=str(config["train"]["device"]), near=float(config["train"]["near"]), far=float(config["train"]["far"]), N_samples=int(config["train"]["N_samples"]))
 

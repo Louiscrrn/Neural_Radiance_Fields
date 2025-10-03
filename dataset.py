@@ -7,7 +7,7 @@ from torchvision import transforms
 
 class LegoDataset(Dataset):
     
-    def __init__(self, root_dir: str, type: str, img_size: int, transform: bool= None):
+    def __init__(self, root_dir: str, type: str, img_size: int, size: int, transform: bool= None):
 
         if type not in ["train", "test", "val"] :
             raise Exception("Error : Unrecognized Dataset type")
@@ -26,6 +26,11 @@ class LegoDataset(Dataset):
 
         self.camera_angle_x = X["camera_angle_x"]
         self.frames = X["frames"]
+
+        # 🟢 Ici on applique le size (si non None)
+        if size is not None:
+            self.images_files = self.images_files[:size]
+            self.frames = self.frames[:size]
 
         self.transform = transforms.Compose([
             transforms.ToTensor(),
