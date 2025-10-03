@@ -21,6 +21,7 @@ train :
   device : cpu
 
 render :
+  model_name: "lego_2025-10-03-14-22_nerf_weights"
   model_path: "outputs/lego_2025-10-03-14-22_nerf_weights.pth"
   focal: 555.0
   phi: -30

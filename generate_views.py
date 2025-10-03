@@ -22,8 +22,9 @@ if __name__ == "__main__":
     device = config["train"]["device"]
     model = NeRF().to(device)
 
-    model_path = str(config["render"]["model_path"])
-    checkpoint = torch.load(model_path + ".pth", map_location=device)
+    model_name = str(config["render"]["model_name"])
+    model_path =  "outputs/" + model_name + ".pth"
+    checkpoint = torch.load( model_path, map_location=device)
     model.load_state_dict(checkpoint)
     model.eval()
     print(f"Modèle chargé depuis {model_path}")
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     step = int(config["render"]["step"])
 
     # --- Output folder ---
-    output_dir = Path("outputs") / Path("renders") / config["experiment"]["name"]
+    output_dir = Path("outputs") / Path("renders" + model_name ) / config["experiment"]["name"]
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # --- Precompute all views with tqdm ---
