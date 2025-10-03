@@ -9,6 +9,7 @@ from model import NeRF, render_image, pose_spherical
 import numpy as np
 from tqdm import tqdm 
 from PIL import Image
+from utils import load_images, show_set_images
 
 if __name__ == "__main__":
     # --- Load config ---
@@ -53,3 +54,6 @@ if __name__ == "__main__":
         img_pil.save(output_dir / f"view_{i:03d}.png")
 
     print(f"✅ Sauvegarde terminée dans {output_dir}")
+
+    generated_test_images = load_images(output_dir)
+    show_set_images(generated_test_images, title="Train Images")
