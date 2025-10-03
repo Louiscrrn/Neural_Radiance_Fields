@@ -33,9 +33,10 @@ if __name__ == "__main__":
             data_path / config["path"]["root"], 
             type="val",
             img_size=img_size,
-            size=cfg_data["train_size"]
+            size=cfg_data["val_size"]
         )
-    print("Dataset length:", len(train_dataset))
+    print("Train DS length:", train_dataset.__len__())
+    print("Val DS length:", val_dataset.__len__())
     
     N_rays = config["train"]["batch_rays"]
     train_loader = DataLoader(
