@@ -1,6 +1,9 @@
 import numpy as np
 from PIL import Image
 import cv2
+import matplotlib.pyplot as plt
+import os
+
 
 def show_set_images(images, title="Images Viewer", delay=500):
     """
@@ -65,3 +68,97 @@ def load_images(file_path) :
     images = [Image.open(f) for f in images_files]
     return images
 
+
+
+def plot_training_curves(history, save_dir=None):
+    """
+    Trace 3 figures séparées (Loss, PSNR, SSIM),
+    chacune avec 2 sous-graphiques (train / val).
+
+    Args:
+        history (pd.DataFrame): doit contenir les colonnes :
+            - epoch
+            - train_loss, train_psnr, train_ssim
+            - val_loss, val_psnr, val_ssim (facultatif)
+        save_dir (str, optional): dossier où sauvegarder les figures PNG
+    """
+    if save_dir is not None:
+        os.makedirs(save_dir, exist_ok=True)
+
+    epochs = history['epoch']
+
+    # ======================== LOSS =========================
+    fig1, axes = plt.subplots(1, 2, figsize=(12, 4))
+    fig1.suptitle('MSE Loss')
+
+    # Train Loss
+    axes[0].plot(epochs, history['train_loss'], marker='o', color='blue')
+    axes[0].set_title('Train')
+    axes[0].set_xlabel('Epoch')
+    axes[0].set_ylabel('MSE Loss')
+    axes[0].grid()
+
+    # Val Loss
+    if 'val_loss' in history and history['val_loss'].notna().any():
+        axes[1].plot(epochs, history['val_loss'], marker='o', color='orange')
+        axes[1].set_title('Validation')
+        axes[1].set_xlabel('Epoch')
+        axes[1].set_ylabel('MSE Loss')
+        axes[1].grid()
+    else:
+        axes[1].set_visible(False)
+
+    fig1.tight_layout(rect=[0, 0, 1, 0.95])
+    if save_dir:
+        fig1.savefig(os.path.join(save_dir, 'loss_curves.png'), dpi=300)
+    plt.show()
+
+    # ======================== PSNR =========================
+    fig2, axes = plt.subplots(1, 2, figsize=(12, 4))
+    fig2.suptitle('PSNR')
+
+    axes[0].plot(epochs, history['train_psnr'], marker='o', color='blue')
+    axes[0].set_title('Train')
+    axes[0].set_xlabel('Epoch')
+    axes[0].set_ylabel('dB')
+    axes[0].grid()
+
+    if 'val_psnr' in history and history['val_psnr'].notna().any():
+        axes[1].plot(epochs, history['val_psnr'], marker='o', color='orange')
+        axes[1].set_title('Validation')
+        axes[1].set_xlabel('Epoch')
+        axes[1].set_ylabel('dB')
+        axes[1].grid()
+    else:
+        axes[1].set_visible(False)
+
+    fig2.tight_layout(rect=[0, 0, 1, 0.95])
+    if save_dir:
+        fig2.savefig(os.path.join(save_dir, 'psnr_curves.png'), dpi=300)
+    plt.show()
+
+    # ======================== SSIM =========================
+    fig3, axes = plt.subplots(1, 2, figsize=(12, 4))
+    fig3.suptitle('SSIM')
+
+    axes[0].plot(epochs, history['train_ssim'], marker='o', color='blue')
+    axes[0].set_title('Train')
+    axes[0].set_xlabel('Epoch')
+    axes[0].set_ylabel('Structural Similarity')
+    axes[0].grid()
+
+    if 'val_ssim' in history and history['val_ssim'].notna().any():
+        axes[1].plot(epochs, history['val_ssim'], marker='o', color='orange')
+        axes[1].set_title('Validation')
+        axes[1].set_xlabel('Epoch')
+        axes[1].set_ylabel('Structural Similarity')
+        axes[1].grid()
+    else:
+        axes[1].set_visible(False)
+
+    fig3.tight_layout(rect=[0, 0, 1, 0.95])
+    if save_dir:
+        fig3.savefig(os.path.join(save_dir, 'ssim_curves.png'), dpi=300)
+    plt.show()
+
+    return fig1, fig2, fig3

@@ -17,7 +17,7 @@ class NeRFTrainer:
         self.N_samples = N_samples
         self.ssim_fn = StructuralSimilarityIndexMeasure(data_range=1.0).to(device)
 
-    def train_step(self, batch):
+    def step(self, batch):
         rays_o = batch["rays_o"].to(self.device)
         rays_d = batch["rays_d"].to(self.device)
         target_rgb = batch["target_rgb"].to(self.device)
@@ -49,37 +49,76 @@ class NeRFTrainer:
 
         return loss.item(), psnr, ssim
 
-    def train(self, train_loader, epochs=10, log_every=100):
-        self.model.train()
+    def fit(self, train_loader, val_loader=None, epochs=10, log_every=100):
+
         global_step = 0
-        data = []
+        history = []
 
         for epoch in range(epochs):
-            pbar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}")
-            epoch_loss = 0.0
-            batch_count = 0
-            epoch_ssim = 0.0
-            epoch_psnr = 0.0
+
+            # --- TRAIN ---
+            self.model.train()
+            train_loss, train_psnr, train_ssim, train_count = 0, 0, 0, 0
+            pbar = tqdm(train_loader, desc=f"[Train] Epoch {epoch+1}/{epochs}")
 
             for batch in pbar:
-                loss, psnr, ssim = self.train_step(batch)
+                loss, psnr, ssim = self.step(batch)
+
+                # Backpropagation
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
+
+                train_loss += loss.item()
+                train_psnr += psnr
+                train_ssim += ssim
+                train_count += 1
                 global_step += 1
-                epoch_loss += loss
-                batch_count += 1
-                epoch_psnr += psnr
-                epoch_ssim += ssim
 
                 if global_step % log_every == 0:
-                    pbar.set_postfix({"loss": f"{loss:.6f}"})
+                    pbar.set_postfix({"loss": f"{loss.item():.6f}"})
 
-            avg_loss = epoch_loss / batch_count
-            avg_psnr = epoch_psnr / batch_count
-            avg_ssim = epoch_ssim / batch_count
-            print(f" Epoch {epoch+1}/{epochs} - Loss: {avg_loss:.6f} | PSNR: {avg_psnr:.2f} | SSIM: {avg_ssim:.3f}")
-            data.append({'epoch' : epoch + 1, 'avg_loss' : avg_loss, 'avg_psnr' : avg_psnr, 'avg_ssim' : avg_ssim})
+
+            train_loss /= train_count
+            train_psnr /= train_count
+            train_ssim /= train_count
+
+            # --- VALIDATION ---
+            if val_loader is not None:
+                self.model.eval()
+                val_loss, val_psnr, val_ssim, val_count = 0, 0, 0, 0
+
+                with torch.no_grad():
+                    for batch in val_loader:
+                        loss, psnr, ssim = self.step(batch)
+                        val_loss += loss.item()
+                        val_psnr += psnr
+                        val_ssim += ssim
+                        val_count += 1
+
+                val_loss /= val_count
+                val_psnr /= val_count
+                val_ssim /= val_count
+
+                print(f"Epoch {epoch+1}/{epochs} "
+                      f"| Train Loss: {train_loss:.6f}, PSNR: {train_psnr:.2f}, SSIM: {train_ssim:.3f} "
+                      f"| Val Loss: {val_loss:.6f}, PSNR: {val_psnr:.2f}, SSIM: {val_ssim:.3f}")
+            else:
+                val_loss = val_psnr = val_ssim = None
+                print(f"Epoch {epoch+1}/{epochs} "
+                      f"| Train Loss: {train_loss:.6f}, PSNR: {train_psnr:.2f}, SSIM: {train_ssim:.3f}")
+                
+            history.append({
+                "epoch": epoch+1,
+                "train_loss": train_loss,
+                "train_psnr": train_psnr,
+                "train_ssim": train_ssim,
+                "val_loss": val_loss,
+                "val_psnr": val_psnr,
+                "val_ssim": val_ssim,
+            })
         
-        historic = pd.DataFrame(data)
-        return historic
+        return pd.DataFrame(history)
         
 
 def mse2psnr(mse):

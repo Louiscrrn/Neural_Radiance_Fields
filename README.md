@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 Set your dataset path in `.env`:
 ```bash
-DATA_PATH=/path/to/nerf_synthetic
+echo "DATA_PATH=/path/to/nerf_synthetic" > .env
 ```
 
 Configure parameters in `config.yaml` (`img_size`, `N_rays`, `lr`, `epochs`, etc.)
