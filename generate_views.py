@@ -35,7 +35,7 @@ if __name__ == "__main__":
     step = int(config["render"]["step"])
 
     # --- Output folder ---
-    output_dir = Path("ouputs") / Path("renders") / config["experiment"]["name"]
+    output_dir = Path("outputs") / Path("renders") / config["experiment"]["name"]
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # --- Precompute all views with tqdm ---
