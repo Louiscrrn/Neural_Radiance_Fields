@@ -98,9 +98,9 @@ class NeRFTrainer:
                 val_psnr /= val_count
                 val_ssim /= val_count
 
-                print(f"Epoch {epoch+1}/{epochs} "
-                      f"| Train Loss: {train_loss:.6f}, PSNR: {train_psnr:.2f}, SSIM: {train_ssim:.3f} \n"
-                      f"| Val Loss: {val_loss:.6f}, PSNR: {val_psnr:.2f}, SSIM: {val_ssim:.3f}")
+                print(f"Epoch {epoch+1}/{epochs} :: \n"
+                      f"| [Train]: | Loss: {train_loss:.6f} | PSNR: {train_psnr:.2f} | SSIM: {train_ssim:.3f} |\n"
+                      f"| [Val]:   | Loss: {val_loss:.6f} | PSNR: {val_psnr:.2f} | SSIM: {val_ssim:.3f} |")
             else:
                 val_loss = val_psnr = val_ssim = None
                 print(f"Epoch {epoch+1}/{epochs} "

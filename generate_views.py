@@ -21,7 +21,7 @@ if __name__ == "__main__":
     model = NeRF().to(device)
 
     model_path = str(config["render"]["model_path"])
-    checkpoint = torch.load(model_path, map_location=device)
+    checkpoint = torch.load(model_path + ".pth", map_location=device)
     model.load_state_dict(checkpoint)
     model.eval()
     print(f"Modèle chargé depuis {model_path}")
