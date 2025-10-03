@@ -12,18 +12,20 @@ experiment :
 
 train :
   batch_size : 1
-  N_rays : 2500
+  N_rays : 4096
   epoch: 3
   log_every: 50
   lr : 5e-4
   img_size : 100
   N_samples : 64
   device : cpu
+  near : 2.0
+  far : 6.0
 
 render :
-  model_name: "lego"
-  focal: 555.0
-  phi: -30
+  model_name: "lego_2025-10-03-10-48_nerf_weights"
+  phi:  30.0
+  theta: 60.0
   radius: 4.0
   step : 5
 

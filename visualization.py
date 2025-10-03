@@ -1,21 +1,12 @@
 import argparse
 from pathlib import Path
 from utils import load_images, show_set_images
-from PIL import Image
-import numpy as np
+
 
 if __name__ == "__main__":
 
-    path = "outputs/lego_orbit/renders/lego/view_058.png"
 
-    img = Image.open(path)
-    print(type(img))         # <class 'PIL.PngImagePlugin.PngImageFile'>
-    print(img.size)          # (width, height)
-    print(img.mode)  
-    print(np.all(np.array(img) == 0)
-)
-
-    """parser = argparse.ArgumentParser(description="Visualisation d'un ensemble d'images")
+    parser = argparse.ArgumentParser(description="Visualisation d'un ensemble d'images")
     parser.add_argument(
         "path",
         type=str,
@@ -39,10 +30,4 @@ if __name__ == "__main__":
 
     print(f"{len(images)} images chargées depuis {img_path}")
 
-    img = images[0]
-
-    print(img.shape)
-    print(img)
-
     show_set_images(images, title=args.title)
-"""

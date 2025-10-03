@@ -52,7 +52,7 @@ if __name__ == "__main__":
     # --- Fitting --- 
     model = NeRF()
     optimizer = torch.optim.Adam(model.parameters(), lr=float(config["train"]["lr"]))
-    trainer = NeRFTrainer(model, optimizer, device=str(config["train"]["device"]), near=2.0, far=6.0, N_samples=int(config["train"]["N_samples"]))
+    trainer = NeRFTrainer(model, optimizer, device=str(config["train"]["device"]), near=float(config["train"]["near"]), far=float(config["train"]["far"]), N_samples=int(config["train"]["N_samples"]))
 
     print("\n\n TRAINING STARTS : \n")
     historic = trainer.fit(train_loader, val_loader=val_loader, epochs=int(config["train"]["epoch"]), log_every=int(config["train"]["log_every"]))

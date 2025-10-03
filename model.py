@@ -151,27 +151,26 @@ def render_image(model, H, W, focal, c2w, near=2.0, far=6.0, N_samples=64, devic
     img = np.clip(img, 0, 1)
     return img
 
+def _normalize(v, eps=1e-8):
+    return v / (torch.norm(v, dim=-1, keepdim=True) + eps)
 
 def pose_spherical(theta, phi, radius):
-    trans_t = torch.tensor([
-        [1, 0, 0, 0],
-        [0, -1, 0, 0],
-        [0, 0, -1, radius],
-        [0, 0, 0, 1]
+    cam_pos = torch.tensor([
+        radius * np.cos(np.radians(phi)) * np.sin(np.radians(theta)),
+        radius * np.sin(np.radians(phi)),
+        radius * np.cos(np.radians(phi)) * np.cos(np.radians(theta))
     ], dtype=torch.float32)
 
-    rot_phi = torch.tensor([
-        [1, 0, 0, 0],
-        [0, np.cos(np.radians(phi)), -np.sin(np.radians(phi)), 0],
-        [0, np.sin(np.radians(phi)), np.cos(np.radians(phi)), 0],
-        [0, 0, 0, 1]
-    ], dtype=torch.float32)
+    forward = _normalize(-cam_pos.unsqueeze(0)).squeeze(0) 
+    up_world = torch.tensor([0.0, 1.0, 0.0], dtype=torch.float32)
 
-    rot_theta = torch.tensor([
-        [np.cos(np.radians(theta)), 0, -np.sin(np.radians(theta)), 0],
-        [0, 1, 0, 0],
-        [np.sin(np.radians(theta)), 0, np.cos(np.radians(theta)), 0],
-        [0, 0, 0, 1]
-    ], dtype=torch.float32)
+    back  = -forward
+    right = _normalize(torch.cross(up_world, back, dim=0))
+    up    = torch.cross(back, right, dim=0)
 
-    return rot_theta @ rot_phi @ trans_t
+    c2w = torch.eye(4, dtype=torch.float32)
+    c2w[:3, 0] = right  
+    c2w[:3, 1] = up    
+    c2w[:3, 2] = back   
+    c2w[:3, 3] = cam_pos
+    return c2w
