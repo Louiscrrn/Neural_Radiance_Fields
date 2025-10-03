@@ -8,7 +8,7 @@ path :
   outputs : "outputs"
 
 experiment :
-  name : "nerf_training"
+  name : "lego"
 
 train :
   batch_size : 1
@@ -21,7 +21,7 @@ train :
   device : cpu
 
 render :
-  model_name: "lego_2025-10-03-14-22_nerf_weights"
+  model_name: "lego"
   focal: 555.0
   phi: -30
   radius: 4.0

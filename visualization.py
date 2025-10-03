@@ -1,29 +1,29 @@
-import yaml
+import argparse
 from pathlib import Path
 from utils import load_images, show_set_images
-import os
-from dotenv import load_dotenv
-
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Visualisation d'un ensemble d'images")
+    parser.add_argument(
+        "path",
+        type=str,
+        help="Chemin vers le dossier contenant les images (png/jpg)"
+    )
+    parser.add_argument(
+        "--title",
+        type=str,
+        default="Image Viewer",
+        help="Titre affiché dans la fenêtre de visualisation"
+    )
+    args = parser.parse_args()
 
-    load_dotenv()
-    data_path = Path(os.getenv('DATA_PATH'))
+    img_path = Path(args.path)
+    if not img_path.exists() or not img_path.is_dir():
+        raise FileNotFoundError(f"Le dossier {img_path} n'existe pas ou n'est pas un dossier valide")
 
-    with open("config.yaml", "r") as f:
-        config = yaml.safe_load(f)
+    images = load_images(img_path)
+    if len(images) == 0:
+        raise RuntimeError(f"Aucun fichier image trouvé dans {img_path}")
 
-    train_path = data_path / Path(config["path"]["train"])    
-    val_path = data_path / Path(config["path"]["val"])    
-    test_path = data_path / Path(config["path"]["test"])    
-
-    train_images = load_images(train_path)
-    val_images = load_images(val_path)
-    test_images = load_images(test_path)
-
-    show_set_images(train_images, title="Train Images")
-    show_set_images(val_images, title="Val Images")
-    show_set_images(test_images, title="Test Images")
-
-
-
+    print(f"{len(images)} images chargées depuis {img_path}")
+    show_set_images(images, title=args.title)
