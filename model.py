@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 import math
+import numpy as np
 
 class PositionalEncoding(nn.Module):
     def __init__(self, L, include_input=False):
@@ -79,8 +80,6 @@ def sample_points(rays_o, rays_d, near, far, N_samples, perturb=True):
 
     return pts, t_vals
 
-import torch
-
 def volume_rendering(rgb, sigma, t_vals, rays_d):
   
     deltas = t_vals[:, 1:] - t_vals[:, :-1]  # (N_rays, N_samples-1)
@@ -104,3 +103,75 @@ def volume_rendering(rgb, sigma, t_vals, rays_d):
     acc_map = torch.sum(weights, dim=-1)  # (N_rays,)
 
     return rgb_map, acc_map, weights
+
+def get_rays(H, W, focal, c2w):
+    """
+    Génère les rayons (origine, direction) pour chaque pixel d'une caméra pinhole.
+    """
+    i, j = torch.meshgrid(
+        torch.arange(W, dtype=torch.float32),
+        torch.arange(H, dtype=torch.float32),
+        indexing='ij'
+    )
+    dirs = torch.stack([
+        (i - W * 0.5) / focal,
+        -(j - H * 0.5) / focal,
+        -torch.ones_like(i)
+    ], -1)  # (W, H, 3)
+
+    rays_d = torch.sum(dirs[..., None, :] * c2w[:3, :3], -1)
+    rays_d = rays_d / torch.norm(rays_d, dim=-1, keepdim=True)
+    rays_o = c2w[:3, 3].expand(rays_d.shape)
+    return rays_o.reshape(-1, 3), rays_d.reshape(-1, 3)
+
+@torch.no_grad()
+def render_image(model, H, W, focal, c2w, near=2.0, far=6.0, N_samples=64, device="cuda"):
+    """
+    Rendu d'une image complète à partir du modèle NeRF entraîné.
+    """
+    model.eval()
+    rays_o, rays_d = get_rays(H, W, focal, c2w)
+    rays_o = rays_o.to(device)
+    rays_d = rays_d.to(device)
+
+    # 1. Échantillonnage
+    pts, t_vals = sample_points(rays_o, rays_d, near, far, N_samples)
+
+    # 2. Évaluation du NeRF
+    pts_flat = pts.reshape(-1, 3)
+    rgb, sigma = model(pts_flat)
+    rgb = rgb.view(pts.shape[0], N_samples, 3)
+    sigma = sigma.view(pts.shape[0], N_samples, 1)
+
+    # 3. Volume rendering
+    rgb_map, _, _ = volume_rendering(rgb, sigma, t_vals, rays_d)
+
+    # 4. Mise en forme en image
+    img = rgb_map.view(H, W, 3).cpu().numpy()
+    img = np.clip(img, 0, 1)
+    return img
+
+
+def pose_spherical(theta, phi, radius):
+    trans_t = torch.tensor([
+        [1, 0, 0, 0],
+        [0, -1, 0, 0],
+        [0, 0, -1, radius],
+        [0, 0, 0, 1]
+    ], dtype=torch.float32)
+
+    rot_phi = torch.tensor([
+        [1, 0, 0, 0],
+        [0, np.cos(np.radians(phi)), -np.sin(np.radians(phi)), 0],
+        [0, np.sin(np.radians(phi)), np.cos(np.radians(phi)), 0],
+        [0, 0, 0, 1]
+    ], dtype=torch.float32)
+
+    rot_theta = torch.tensor([
+        [np.cos(np.radians(theta)), 0, -np.sin(np.radians(theta)), 0],
+        [0, 1, 0, 0],
+        [np.sin(np.radians(theta)), 0, np.cos(np.radians(theta)), 0],
+        [0, 0, 0, 1]
+    ], dtype=torch.float32)
+
+    return rot_theta @ rot_phi @ trans_t

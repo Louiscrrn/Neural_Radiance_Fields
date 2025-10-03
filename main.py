@@ -6,7 +6,7 @@ from pathlib import Path
 from dataset import LegoDataset, collate_rays
 from torch.utils.data import DataLoader
 from model import NeRF
-from train import NeRFTrainer
+from trainer import NeRFTrainer
 from datetime import datetime
 from utils import plot_training_curves
 
@@ -61,3 +61,6 @@ if __name__ == "__main__":
     prefix_name = config["path"]["outputs"] + "/" + config["experiment"]["name"] + "_" + formatted + "_"
     historic.to_csv(prefix_name + "historic.csv", index=False)
     plot_training_curves(historic, save_dir=prefix_name + "curves/")
+
+    model_path = prefix_name + "nerf_weights.pth"
+    torch.save(trainer.model.state_dict(), model_path)

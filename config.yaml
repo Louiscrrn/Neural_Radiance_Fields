@@ -19,3 +19,11 @@ train :
   img_size : 100
   N_samples : 64
   device : cpu
+
+render :
+  model_path: "outputs/lego_2025-10-03-14-22_nerf_weights.pth"
+  focal: 555.0
+  phi: -30
+  radius: 4.0
+  step : 5
+
