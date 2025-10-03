@@ -84,19 +84,22 @@ class NeRFTrainer:
                 val_loss, val_psnr, val_ssim, val_count = 0, 0, 0, 0
 
                 with torch.no_grad():
-                    for batch in val_loader:
+                    pbar_val = tqdm(val_loader, desc=f"[Val]   Epoch {epoch+1}/{epochs}")
+                    for batch in pbar_val:
                         loss, psnr, ssim = self.step(batch)
                         val_loss += loss.item()
                         val_psnr += psnr
                         val_ssim += ssim
                         val_count += 1
 
+                        pbar_val.set_postfix({"val_loss": f"{loss.item():.6f}"})
+
                 val_loss /= val_count
                 val_psnr /= val_count
                 val_ssim /= val_count
 
                 print(f"Epoch {epoch+1}/{epochs} "
-                      f"| Train Loss: {train_loss:.6f}, PSNR: {train_psnr:.2f}, SSIM: {train_ssim:.3f} "
+                      f"| Train Loss: {train_loss:.6f}, PSNR: {train_psnr:.2f}, SSIM: {train_ssim:.3f} \n"
                       f"| Val Loss: {val_loss:.6f}, PSNR: {val_psnr:.2f}, SSIM: {val_ssim:.3f}")
             else:
                 val_loss = val_psnr = val_ssim = None

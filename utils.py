@@ -69,11 +69,10 @@ def load_images(file_path) :
     return images
 
 
-
 def plot_training_curves(history, save_dir=None):
     """
     Trace 3 figures séparées (Loss, PSNR, SSIM),
-    chacune avec 2 sous-graphiques (train / val).
+    chacune avec les courbes train et val sur le même graphique.
 
     Args:
         history (pd.DataFrame): doit contenir les colonnes :
@@ -88,77 +87,46 @@ def plot_training_curves(history, save_dir=None):
     epochs = history['epoch']
 
     # ======================== LOSS =========================
-    fig1, axes = plt.subplots(1, 2, figsize=(12, 4))
-    fig1.suptitle('MSE Loss')
-
-    # Train Loss
-    axes[0].plot(epochs, history['train_loss'], marker='o', color='blue')
-    axes[0].set_title('Train')
-    axes[0].set_xlabel('Epoch')
-    axes[0].set_ylabel('MSE Loss')
-    axes[0].grid()
-
-    # Val Loss
+    fig1 = plt.figure(figsize=(8,5))
+    plt.plot(epochs, history['train_loss'], label='Train', marker='o', color='blue')
     if 'val_loss' in history and history['val_loss'].notna().any():
-        axes[1].plot(epochs, history['val_loss'], marker='o', color='orange')
-        axes[1].set_title('Validation')
-        axes[1].set_xlabel('Epoch')
-        axes[1].set_ylabel('MSE Loss')
-        axes[1].grid()
-    else:
-        axes[1].set_visible(False)
-
-    fig1.tight_layout(rect=[0, 0, 1, 0.95])
+        plt.plot(epochs, history['val_loss'], label='Validation', marker='s', color='orange')
+    plt.title('MSE Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('MSE Loss')
+    plt.grid()
+    plt.legend()
     if save_dir:
         fig1.savefig(os.path.join(save_dir, 'loss_curves.png'), dpi=300)
     plt.show()
 
     # ======================== PSNR =========================
-    fig2, axes = plt.subplots(1, 2, figsize=(12, 4))
-    fig2.suptitle('PSNR')
-
-    axes[0].plot(epochs, history['train_psnr'], marker='o', color='blue')
-    axes[0].set_title('Train')
-    axes[0].set_xlabel('Epoch')
-    axes[0].set_ylabel('dB')
-    axes[0].grid()
-
+    fig2 = plt.figure(figsize=(8,5))
+    plt.plot(epochs, history['train_psnr'], label='Train', marker='o', color='blue')
     if 'val_psnr' in history and history['val_psnr'].notna().any():
-        axes[1].plot(epochs, history['val_psnr'], marker='o', color='orange')
-        axes[1].set_title('Validation')
-        axes[1].set_xlabel('Epoch')
-        axes[1].set_ylabel('dB')
-        axes[1].grid()
-    else:
-        axes[1].set_visible(False)
-
-    fig2.tight_layout(rect=[0, 0, 1, 0.95])
+        plt.plot(epochs, history['val_psnr'], label='Validation', marker='s', color='orange')
+    plt.title('PSNR')
+    plt.xlabel('Epoch')
+    plt.ylabel('dB')
+    plt.grid()
+    plt.legend()
     if save_dir:
         fig2.savefig(os.path.join(save_dir, 'psnr_curves.png'), dpi=300)
     plt.show()
 
     # ======================== SSIM =========================
-    fig3, axes = plt.subplots(1, 2, figsize=(12, 4))
-    fig3.suptitle('SSIM')
-
-    axes[0].plot(epochs, history['train_ssim'], marker='o', color='blue')
-    axes[0].set_title('Train')
-    axes[0].set_xlabel('Epoch')
-    axes[0].set_ylabel('Structural Similarity')
-    axes[0].grid()
-
+    fig3 = plt.figure(figsize=(8,5))
+    plt.plot(epochs, history['train_ssim'], label='Train', marker='o', color='blue')
     if 'val_ssim' in history and history['val_ssim'].notna().any():
-        axes[1].plot(epochs, history['val_ssim'], marker='o', color='orange')
-        axes[1].set_title('Validation')
-        axes[1].set_xlabel('Epoch')
-        axes[1].set_ylabel('Structural Similarity')
-        axes[1].grid()
-    else:
-        axes[1].set_visible(False)
-
-    fig3.tight_layout(rect=[0, 0, 1, 0.95])
+        plt.plot(epochs, history['val_ssim'], label='Validation', marker='s', color='orange')
+    plt.title('SSIM')
+    plt.xlabel('Epoch')
+    plt.ylabel('Structural Similarity')
+    plt.grid()
+    plt.legend()
     if save_dir:
         fig3.savefig(os.path.join(save_dir, 'ssim_curves.png'), dpi=300)
     plt.show()
 
     return fig1, fig2, fig3
+
