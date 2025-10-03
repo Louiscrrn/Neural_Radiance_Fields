@@ -8,6 +8,7 @@ from pathlib import Path
 from model import NeRF, render_image, pose_spherical
 import numpy as np
 from tqdm import tqdm 
+from PIL import Image
 
 if __name__ == "__main__":
     # --- Load config ---
@@ -33,41 +34,22 @@ if __name__ == "__main__":
     radius = float(config["render"]["radius"])
     step = int(config["render"]["step"])
 
+    # --- Output folder ---
+    output_dir = Path("ouputs") / Path("renders") / config["experiment"]["name"]
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     # --- Precompute all views with tqdm ---
     theta_list = np.arange(0, 361, 5)  # par exemple tous les 5°
-    images = []
+    print(f"Génération et sauvegarde de {len(theta_list)} vues dans {output_dir}")
 
-    print(f"Pré-calcul des {len(theta_list)} vues en cours...")
-    for theta in tqdm(theta_list, desc="Pré-calcul"):
+    for i, theta in enumerate(tqdm(theta_list, desc="Rendu vues")):
         c2w = pose_spherical(theta, phi, radius)
-        img = render_image(model, H, W, focal, c2w, device=device)
-        images.append(img)
-    print("Pré-calcul terminé !")
+        img = render_image(model, H, W, focal, c2w, device=device)  # [H, W, 3], float32 [0,1]
 
-    # --- Interactive viewer ---
-    fig, ax = plt.subplots()
-    plt.subplots_adjust(bottom=0.25)
-    im = ax.imshow(images[0])
-    ax.axis('off')
-    ax.set_title(f"Angle θ = {theta_list[0]:.1f}°")
+        # Convertir en PIL image
+        img_uint8 = (img * 255).astype(np.uint8)
+        img_pil = Image.fromarray(img_uint8)
 
-    # Slider
-    ax_slider = plt.axes([0.2, 0.1, 0.6, 0.03])
-    slider_theta = Slider(
-        ax_slider,
-        label='Theta (angle)',
-        valmin=0,
-        valmax=len(theta_list)-1,
-        valinit=0,
-        valstep=1
-    )
+        img_pil.save(output_dir / f"view_{i:03d}.png")
 
-    def update(idx):
-        idx = int(slider_theta.val)
-        im.set_data(images[idx])
-        ax.set_title(f"Angle θ = {theta_list[idx]:.1f}°")
-        fig.canvas.draw_idle()
-
-    slider_theta.on_changed(update)
-
-    plt.show()
+    print(f"✅ Sauvegarde terminée dans {output_dir}")
